@@ -1,0 +1,39 @@
+name: Build KeePassium IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build Archive
+        run: |
+          xcodebuild clean archive \
+            -project KeePassium.xcodeproj \
+            -scheme KeePassium \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/KeePassium.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Package into IPA
+        run: |
+          mkdir -p build/Payload
+          cp -r build/KeePassium.xcarchive/Products/Applications/KeePassium.app build/Payload/
+          cd build
+          zip -r KeePassium.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeePassium-unsigned-ipa
+          path: build/KeePassium.ipa
