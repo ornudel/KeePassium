@@ -13,14 +13,14 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build Archive
+      - name: Build App
         run: |
-          xcodebuild clean archive \
+          xcodebuild clean build \
             -project KeePassium.xcodeproj \
             -scheme KeePassium \
             -configuration Release \
-            -destination 'generic/platform=iOS' \
-            -archivePath build/KeePassium.xcarchive \
+            -sdk iphoneos \
+            -derivedDataPath DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=""
@@ -28,7 +28,7 @@ jobs:
       - name: Package into IPA
         run: |
           mkdir -p build/Payload
-          cp -r build/KeePassium.xcarchive/Products/Applications/KeePassium.app build/Payload/
+          cp -r DerivedData/Build/Products/Release-iphoneos/KeePassium.app build/Payload/
           cd build
           zip -r KeePassium.ipa Payload
 
